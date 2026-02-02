@@ -1,0 +1,45 @@
+ALWAYS start with nmap! scan your target with:
+nmap -sV 10.82.177.173 -T5
+we could see that we have 3 open ports!
+
+21/tcp open  ftp     vsftpd 3.0.3
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+
+First i went to the website and there was nothing there just a picture, after running gobuster i found nothing :3
+then i looked at the source code and i found 2 HINTS! that solved the lab right away for me
+first hint:
+ /* The image used */
+  background-image: url("brooklyn99.jpg");
+
+second hint:
+<!-- Have you ever heard of steganography? -->
+very cool indeed, isnt ?
+
+Now by downloading the image with this command:
+wget http://10.82.177.173/brooklyn99.jpg
+i tried to extract the hidden text inside the image using steghide but there was a 'passphrase' we need to enter in order to extract the hidden text, 
+now we need to brute force the passphrase by using the following command:
+stegseek -sf brooklyn99.jpg
+we found the passphrase! <3
+and after some rabbitholes i had an idea, i clicked the hint on thm and it told me JAKE, and we got ssh port open, so why not? lets brute force jake ssh!
+hydra -l jake -P /usr/share/wordlists/rockyou.txt 10.82.177.173 ssh
+DONE we got the password for jake ssh , lets get our first flag [user.txt]
+
+now in order to escalate our privileges and get the root privileges, lets try some commands
+i tried to find binaries that run with root permissions by this command:
+find / -perm -4000 2>/dev/null
+but nothing there, so i tried to run [sudo -l]
+and here it is
+          
+User jake may run the following commands on brookly_nine_nine:
+    (ALL) NOPASSWD: /usr/bin/less
+
+we could run 'less' with root permissions! 
+just type less /root/root.txt
+and just that we got the root flag as well
+
+Thanks for Reading
+
+
+
